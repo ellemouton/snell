@@ -8,11 +8,10 @@ create table if not exists articles_content (
 create table if not exists articles_info (
     id int auto_increment,
     name varchar(255) not null,
-    decription text not null,
+    description text not null,
     price int not null,
-    article_content int not null,
+    content_id int not null,
 
-    primary key (id),
-    foreign key (article_content) references articles_content(id) 
+    primary key (id)
 );
 
