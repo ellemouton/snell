@@ -7,7 +7,7 @@ import (
 )
 
 func Create(dbc *sql.DB, name, description string, price int64, text string) (int64, error) {
-	// TODO(elle): Replace with a transaction
+	// TODO(elle): Replace with a transaction.These two inserts must be atomic
 	res, err := dbc.Exec("insert into articles_content set text=?", text)
 	if err != nil {
 		return 0, err
@@ -49,4 +49,22 @@ func LookupContent(dbc *sql.DB, id int64) (*articles.Content, error) {
 	}
 
 	return &content, nil
+}
+
+func ListAllInfo(dbc *sql.DB) (infos []*articles.Info, err error) {
+	rows, err := dbc.Query("select * from articles_info")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		info := articles.Info{}
+		err = rows.Scan(&info.ID, &info.Name, &info.Description, &info.Price, &info.ContentID)
+		if err != nil {
+			return nil, err
+		}
+		infos = append(infos, &info)
+	}
+	return infos, rows.Err()
 }

@@ -41,3 +41,20 @@ func TestLookupContent(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, content.Text, "blah blah blah")
 }
+
+func TestListAllInfos(t *testing.T) {
+	dbc := db.ConnectForTesting(t)
+
+	_, err := Create(dbc, "title", "the dash", 1, "blah blah blah")
+	require.NoError(t, err)
+
+	_, err = Create(dbc, "title", "the dash", 1, "blah blah blah")
+	require.NoError(t, err)
+
+	_, err = Create(dbc, "title", "the dash", 1, "blah blah blah")
+	require.NoError(t, err)
+
+	infos, err := ListAllInfo(dbc)
+	require.NoError(t, err)
+	require.Equal(t, len(infos), 3)
+}

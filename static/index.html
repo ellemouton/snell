@@ -1,0 +1,14 @@
+<!--index.html-->
+
+{{ template "header.html" .}}
+
+  <h1>Hello Snell!</h1>
+	
+  {{range .payload }}
+    <a href="/article/view/{{.ID}}">
+      <h2>{{.Name}}</h2>
+    </a>
+    <p>{{.Description}}</p>
+  {{end}}
+
+{{ template "footer.html" .}}

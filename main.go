@@ -12,7 +12,8 @@ var router *gin.Engine
 
 func main() {
 	router = gin.Default()
-	router.LoadHTMLGlob("static/*")
+	router.LoadHTMLGlob("static/*.html")
+	router.Static("/css", "./static/css")
 
 	s, err := NewState()
 	if err != nil {
