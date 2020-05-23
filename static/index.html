@@ -2,15 +2,20 @@
 
 {{ template "header.html" .}}
 
+<div class="title">
+	<h1>Snell</h1>
+</div>
+
 <div class="container">
-  <h1>Hello Snell!</h1>
-	
-  {{range .payload }}
-    <a href="/article/view/{{.ID}}">
-      <h2>{{.Name}}</h2>
-    </a>
-    <p>{{.Description}}</p>
-  {{end}}
+  	{{range .payload }}
+    	<a href="/article/view/{{.ID}}">
+		<div class="article">
+				<h2>{{.Name}}</h2>
+				<p class="description">{{.Description}}</p>
+			<p class="price">Price: {{.Price}} satoshis</p>
+		</div>
+    	</a>
+  	{{end}}
 </div>
 
 {{ template "footer.html" .}}

@@ -2,6 +2,16 @@
 
 {{ template "header.html" .}}
 
-<p>{{.payload.Text}}</p>
+<div class="title">
+	<h1>Snell</h1>
+</div>
+
+
+<div class="container">
+	<h1>{{.info.Name}}</h1>
+	<p class="description">{{.info.Description}}</p>
+	<p class="atext">{{.payload.Text}}</p>
+</div>
+
 
 {{ template "footer.html" .}}

@@ -14,10 +14,12 @@ import (
 func registerRoutes(s *State) {
 	router.GET("/", s.homeHandler)
 	router.GET("/post", s.postArticleFormHandler)
-	router.POST("/post", s.saveArticleHandler)
 	router.GET("/article/view/:id", s.viewArticleHandler)
+
 	router.GET("/fancy", s.paymentHandler)
 	router.GET("/blah", s.checkForAuthHandler)
+
+	router.POST("/post", s.saveArticleHandler)
 }
 
 func (s *State) homeHandler(c *gin.Context) {
@@ -91,6 +93,7 @@ func (s *State) viewArticleHandler(c *gin.Context) {
 		"article.html",
 		gin.H{
 			"title":   "View",
+			"info":    article,
 			"payload": content,
 		},
 	)
