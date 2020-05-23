@@ -4,11 +4,12 @@ go 1.14
 
 require (
 	github.com/gin-gonic/gin v1.6.3
+	github.com/go-errors/errors v1.0.1
 	github.com/go-sql-driver/mysql v1.5.0
-	github.com/golang/protobuf v1.4.2 // indirect
-	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
-	github.com/modern-go/reflect2 v1.0.1 // indirect
+	github.com/lightningnetwork/lnd v0.10.0-beta.rc6
+	github.com/pkg/errors v0.8.0
 	github.com/stretchr/testify v1.4.0
-	golang.org/x/sys v0.0.0-20200519105757-fe76b779f299 // indirect
-	gopkg.in/yaml.v2 v2.3.0 // indirect
+	go.etcd.io/etcd v0.0.0-20191023171146-3cf2f69b5738
+	google.golang.org/grpc v1.23.1
+	gopkg.in/macaroon.v2 v2.0.0
 )

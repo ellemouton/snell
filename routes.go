@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"regexp"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -15,6 +16,8 @@ func registerRoutes(s *State) {
 	router.GET("/post", s.postArticleFormHandler)
 	router.POST("/post", s.saveArticleHandler)
 	router.GET("/article/view/:id", s.viewArticleHandler)
+	router.GET("/fancy", s.paymentHandler)
+	router.GET("/blah", s.checkForAuthHandler)
 }
 
 func (s *State) homeHandler(c *gin.Context) {
@@ -69,12 +72,14 @@ func (s *State) viewArticleHandler(c *gin.Context) {
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}
 
-	fmt.Println(id)
-
 	article, err := articles_db.LookupInfo(s.GetDB(), id)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}
+
+	// check auth
+	// if found, validate and show page
+	// else respond with payment challenge (mac + invoice)
 
 	content, err := articles_db.LookupContent(s.GetDB(), article.ContentID)
 	if err != nil {
@@ -89,5 +94,43 @@ func (s *State) viewArticleHandler(c *gin.Context) {
 			"payload": content,
 		},
 	)
+}
 
+func (s *State) paymentHandler(c *gin.Context) {
+
+	str := fmt.Sprintf("LSAT macaroon=\"aslkdjfklsajdkfjsdf\", invoice=\"ln155jgfhgasjklsdfk\"")
+	c.Writer.Header().Set("www-authenticate", str)
+
+	c.HTML(
+		http.StatusPaymentRequired,
+		"payment.html",
+		gin.H{
+			"title": "payment",
+		},
+	)
+}
+
+var authRegex = regexp.MustCompile("LSAT (.*?):([a-f0-9]{64})")
+
+func (s *State) checkForAuthHandler(c *gin.Context) {
+	auth := c.GetHeader("Authorization")
+
+	if auth == "" {
+		s.paymentHandler(c)
+		return
+	}
+
+	if !authRegex.MatchString(auth) {
+		s.paymentHandler(c)
+		return
+	}
+
+	matches := authRegex.FindStringSubmatch(auth)
+	if len(matches) != 3 {
+		s.paymentHandler(c)
+		return
+	}
+
+	macBytes, preimageHex := matches[1], matches[2]
+	fmt.Fprintln(c.Writer, macBytes, preimageHex)
 }
