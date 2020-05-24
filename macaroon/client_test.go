@@ -25,6 +25,14 @@ func (mockEtcd) Close() error {
 	return nil
 }
 
+func (mockEtcd) Get(ctx context.Context, key string, opts ...clientv3.OpOption) (*clientv3.GetResponse, error) {
+	return nil, nil
+}
+
+func (mockEtcd) Delete(ctx context.Context, key string, opts ...clientv3.OpOption) (*clientv3.DeleteResponse, error) {
+	return nil, nil
+}
+
 func TestCreateMacaroon(t *testing.T) {
 	c := &client{etcdClient: mockEtcd{}}
 
