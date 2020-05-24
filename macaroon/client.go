@@ -5,39 +5,28 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
-	"flag"
-	"fmt"
+	"strconv"
 	"strings"
-	"time"
 
 	"github.com/lightningnetwork/lnd/lntypes"
-	"go.etcd.io/etcd/clientv3"
 	"gopkg.in/macaroon.v2"
+
+	"github.com/ellemouton/snell/etcd"
 )
 
-var etcdHost = flag.String("etcd_host", "localhost:2379", "etcd host")
-var etcdUser = flag.String("etcd_user", "", "etcd user")
-var etcdPassword = flag.String("etcd_password", "", "etcd password")
-
 type client struct {
-	etcdClient *clientv3.Client
+	etcdClient etcd.Client
 }
 
 func New() (Client, error) {
-	mac := new(client)
-
-	ec, err := clientv3.New(clientv3.Config{
-		Endpoints:   []string{*etcdHost},
-		DialTimeout: 5 * time.Second,
-		Username:    *etcdUser,
-		Password:    *etcdPassword,
-	})
+	ec, err := etcd.New()
 	if err != nil {
-		return nil, fmt.Errorf("unable to connect to etcd: %v", err)
+		return nil, err
 	}
-	mac.etcdClient = ec
 
-	return mac, nil
+	return &client{
+		etcdClient: ec,
+	}, nil
 }
 
 func (c *client) Close() error {
@@ -69,18 +58,21 @@ func (c *client) Create(paymentHash lntypes.Hash, resourceType string, resourceI
 	// Store the key-value pair
 	c.etcdClient.Put(context.TODO(), idKey, string(rootKey[:]))
 
-	_, err = macaroon.New(rootKey[:], idBytes, "snell", macaroon.LatestVersion)
+	mac, err := macaroon.New(rootKey[:], idBytes, "snell", macaroon.LatestVersion)
 	if err != nil {
 		return nil, err
 	}
 
-	//if err := mac.AddFirstPartyCaveat(); err != nil {
-	//	return nil, err
-	//}
+	cav := &caveat{
+		key:   resourceType,
+		value: strconv.FormatInt(resourceID, 10),
+	}
 
-	// add first party caveat to Macaroon. (condition = "resource Type", value = resourceID)
-	// return Mac (can convert to bytes later with .MarshalBinary(), and then encode to base64 string.)
-	return nil, nil
+	if err := mac.AddFirstPartyCaveat(cav.encode()); err != nil {
+		return nil, err
+	}
+
+	return mac, nil
 }
 
 func generateRandomBytes(n int64) []byte {
