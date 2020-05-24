@@ -46,10 +46,15 @@ func New() (Client, error) {
 	}, nil
 }
 
-func (c *client) AddInvoice(ctx context.Context, numSats int64, expiry int64) (*lnrpc.AddInvoiceResponse, error) {
+func (c *client) AddInvoice(ctx context.Context, numSats int64, expiry int64, memo string) (*lnrpc.AddInvoiceResponse, error) {
 	req := &lnrpc.Invoice{
 		Value:  numSats,
 		Expiry: expiry,
+		Memo:   memo,
 	}
 	return c.rpcClient.AddInvoice(ctx, req)
+}
+
+func (c *client) Close() error {
+	return c.rpcConn.Close()
 }

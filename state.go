@@ -2,27 +2,21 @@ package main
 
 import (
 	"database/sql"
-	"flag"
 	"fmt"
-	"time"
 
 	"github.com/ellemouton/snell/db"
 	"github.com/ellemouton/snell/lnd"
-	"go.etcd.io/etcd/clientv3"
+	"github.com/ellemouton/snell/macaroon"
 )
 
-var etcdHost = flag.String("etcd_host", "localhost:2379", "etcd host")
-var etcdUser = flag.String("etcd_user", "", "etcd user")
-var etcdPassword = flag.String("etcd_password", "", "etcd password")
-
 type State struct {
-	db         *sql.DB
-	etcdClient *clientv3.Client
-	lndClient  lnd.Client
+	db        *sql.DB
+	lndClient lnd.Client
+	macClient macaroon.Client
 }
 
 func NewState() (*State, error) {
-	s := &State{}
+	s := new(State)
 
 	db, err := db.Connect()
 	if err != nil {
@@ -30,16 +24,17 @@ func NewState() (*State, error) {
 	}
 	s.db = db
 
-	ec, err := clientv3.New(clientv3.Config{
-		Endpoints:   []string{*etcdHost},
-		DialTimeout: 5 * time.Second,
-		Username:    *etcdUser,
-		Password:    *etcdPassword,
-	})
+	mc, err := macaroon.New()
 	if err != nil {
-		return nil, fmt.Errorf("unable to connect to etcd: %v", err)
+		return nil, fmt.Errorf("problem creating macaroon client: %s", err)
 	}
-	s.etcdClient = ec
+	s.macClient = mc
+
+	lc, err := lnd.New()
+	if err != nil {
+		return nil, fmt.Errorf("problem creating lnd client: %s", err)
+	}
+	s.lndClient = lc
 
 	return s, nil
 }
@@ -48,6 +43,25 @@ func (s *State) GetDB() *sql.DB {
 	return s.db
 }
 
-func (s *State) GetEtcdClient() *clientv3.Client {
-	return s.etcdClient
+func (s *State) GetMacaroonClient() macaroon.Client {
+	return s.macClient
+}
+
+func (s *State) GetLndClient() lnd.Client {
+	return s.lndClient
+}
+
+func (s *State) cleanup() {
+	if err := s.db.Close(); err != nil {
+		fmt.Errorf("error closing db: %v", err)
+	}
+
+	if err := s.macClient.Close(); err != nil {
+		fmt.Errorf("error closing db: %v", err)
+	}
+
+	if err := s.lndClient.Close(); err != nil {
+		fmt.Errorf("error closing db: %v", err)
+	}
+
 }

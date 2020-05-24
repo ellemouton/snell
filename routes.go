@@ -23,7 +23,6 @@ func registerRoutes(s *State) {
 }
 
 func (s *State) homeHandler(c *gin.Context) {
-
 	articles, err := articles_db.ListAllInfo(s.GetDB())
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
@@ -82,7 +81,10 @@ func (s *State) viewArticleHandler(c *gin.Context) {
 	// check auth
 	// if found, validate and show page
 	// else respond with payment challenge (mac + invoice)
+	//	1. Use article price (and maybe article name as memo) to generate a new invoice using LND client)
+	//	2.
 
+	// IF AUTH FOUND AND IS VALID
 	content, err := articles_db.LookupContent(s.GetDB(), article.ContentID)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)

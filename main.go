@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 
@@ -11,6 +12,8 @@ import (
 var router *gin.Engine
 
 func main() {
+	flag.Parse()
+
 	router = gin.Default()
 	router.LoadHTMLGlob("static/*.html")
 	router.Static("/css", "./static/css")
@@ -19,6 +22,7 @@ func main() {
 	if err != nil {
 		log.Fatal(fmt.Sprintf("problem initializing the state: %s", err.Error()))
 	}
+	defer s.cleanup()
 
 	registerRoutes(s)
 	router.Run()
