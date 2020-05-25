@@ -75,6 +75,56 @@ func (c *client) Create(paymentHash lntypes.Hash, resourceType string, resourceI
 	return mac, nil
 }
 
+func (c *client) Verify(m *macaroon.Macaroon, preimage []byte, resourceType string, resourceID int64) (bool, error) {
+	id, err := decodeIdentifier(m.Id())
+	if err != nil {
+		return false, err
+	}
+
+	// 1. check preimage and paymentHash
+	if id.paymentHash != sha256.Sum256(preimage) {
+		return false, nil
+	}
+
+	// 2. check that this macaroon was made by this server
+	idHash := sha256.Sum256(m.Id())
+	idKey := strings.Join([]string{"snell", "secrets", hex.EncodeToString(idHash[:])}, "/")
+
+	resp, err := c.etcdClient.Get(context.TODO(), idKey)
+	if err != nil {
+		return false, err
+	}
+
+	if len(resp.Kvs) == 0 {
+		return false, nil
+	}
+
+	rawCaveats, err := m.VerifySignature(resp.Kvs[0].Value, nil)
+	if err != nil {
+		return false, err
+	}
+
+	// 3. check that correct caveats for given resource are present
+	for _, rawCaveat := range rawCaveats {
+		caveat, err := decodeCaveat(rawCaveat)
+		if err != nil {
+			continue
+		}
+
+		if caveat.key != resourceType {
+			continue
+		}
+
+		if caveat.value != strconv.FormatInt(resourceID, 10) {
+			continue
+		}
+
+		return true, nil
+	}
+
+	return false, nil
+}
+
 func generateRandomBytes(n int64) []byte {
 	b := make([]byte, n)
 	rand.Read(b)

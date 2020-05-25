@@ -70,6 +70,8 @@ func (s *State) saveArticleHandler(c *gin.Context) {
 	s.homeHandler(c)
 }
 
+var authRegex = regexp.MustCompile("LSAT (.*?):([a-f0-9]{64})")
+
 func (s *State) viewArticleHandler(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
@@ -105,15 +107,15 @@ func (s *State) viewArticleHandler(c *gin.Context) {
 		return
 	}
 
-	//macBytes, preimageHex := matches[1], matches[2]
+	// macBytes, preimageHex := matches[1], matches[2]
 
-	// check auth
-	// if found, validate and show page
-	// else respond with payment challenge (mac + invoice)
-	//	1. Use article price (and maybe article name as memo) to generate a new invoice using LND client)
-	//	2.
+	// validate:
+	//	1. check mac was minted by me
+	//	2. validate preimage
+	//	3. check caveat for given article
 
-	// IF AUTH FOUND AND IS VALID
+	// not valid: payment handler
+	// else: view page
 
 }
 
@@ -176,7 +178,7 @@ func (s *State) paymentHandler(c *gin.Context) {
 	}
 
 	str := fmt.Sprintf("LSAT macaroon=\"%s\", invoice=\"%s\"", base64.StdEncoding.EncodeToString(macBytes), invoice.PaymentRequest)
-	c.Writer.Header().Set("www-authenticate", str)
+	c.Writer.Header().Set("WWW-Authenticate", str)
 
 	c.HTML(
 		http.StatusPaymentRequired,
@@ -187,8 +189,6 @@ func (s *State) paymentHandler(c *gin.Context) {
 		},
 	)
 }
-
-var authRegex = regexp.MustCompile("LSAT (.*?):([a-f0-9]{64})")
 
 func (s *State) checkForAuthHandler(c *gin.Context) {
 	auth := c.GetHeader("Authorization")
