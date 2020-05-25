@@ -8,5 +8,5 @@ import (
 type Client interface {
 	Close() error
 	Create(paymentHash lntypes.Hash, resourceType string, resourceID int64) (*macaroon.Macaroon, error)
-	Verify(m *macaroon.Macaroon, preimage []byte, resourceType string, resourceID int64) (bool, error)
+	Verify(macBytes []byte, preimage []byte, resourceType string, resourceID int64) (bool, error)
 }

@@ -75,8 +75,15 @@ func (c *client) Create(paymentHash lntypes.Hash, resourceType string, resourceI
 	return mac, nil
 }
 
-func (c *client) Verify(m *macaroon.Macaroon, preimage []byte, resourceType string, resourceID int64) (bool, error) {
-	id, err := decodeIdentifier(m.Id())
+func (c *client) Verify(macBytes []byte, preimage []byte, resourceType string, resourceID int64) (bool, error) {
+
+	mac := &macaroon.Macaroon{}
+	err := mac.UnmarshalBinary(macBytes)
+	if err != nil {
+		return false, err
+	}
+
+	id, err := decodeIdentifier(mac.Id())
 	if err != nil {
 		return false, err
 	}
@@ -87,7 +94,7 @@ func (c *client) Verify(m *macaroon.Macaroon, preimage []byte, resourceType stri
 	}
 
 	// 2. check that this macaroon was made by this server
-	idHash := sha256.Sum256(m.Id())
+	idHash := sha256.Sum256(mac.Id())
 	idKey := strings.Join([]string{"snell", "secrets", hex.EncodeToString(idHash[:])}, "/")
 
 	resp, err := c.etcdClient.Get(context.TODO(), idKey)
@@ -99,7 +106,7 @@ func (c *client) Verify(m *macaroon.Macaroon, preimage []byte, resourceType stri
 		return false, nil
 	}
 
-	rawCaveats, err := m.VerifySignature(resp.Kvs[0].Value, nil)
+	rawCaveats, err := mac.VerifySignature(resp.Kvs[0].Value, nil)
 	if err != nil {
 		return false, err
 	}

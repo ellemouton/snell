@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/base64"
+	"encoding/hex"
 	"fmt"
 	"net/http"
 	"regexp"
@@ -107,16 +108,32 @@ func (s *State) viewArticleHandler(c *gin.Context) {
 		return
 	}
 
-	// macBytes, preimageHex := matches[1], matches[2]
+	macString, preimageHexString := matches[1], matches[2]
 
-	// validate:
-	//	1. check mac was minted by me
-	//	2. validate preimage
-	//	3. check caveat for given article
+	macBytes, err := base64.StdEncoding.DecodeString(macString)
+	if err != nil {
+		s.paymentHandler(c)
+		return
+	}
 
-	// not valid: payment handler
-	// else: view page
+	preimage, err := hex.DecodeString(preimageHexString)
+	if err != nil {
+		s.paymentHandler(c)
+		return
+	}
 
+	valid, err := s.macClient.Verify(macBytes, preimage, "article", id)
+	if err != nil {
+		s.paymentHandler(c)
+		return
+	}
+
+	if !valid {
+		s.paymentHandler(c)
+		return
+	}
+
+	s.displayArticleHandler(c)
 }
 
 func (s *State) displayArticleHandler(c *gin.Context) {
