@@ -17,6 +17,7 @@ func main() {
 	router = gin.Default()
 	router.LoadHTMLGlob("static/*.html")
 	router.Static("/css", "./static/css")
+	router.Static("/js", "./static/js")
 
 	s, err := NewState()
 	if err != nil {
@@ -25,5 +26,5 @@ func main() {
 	defer s.cleanup()
 
 	registerRoutes(s)
-	router.Run()
+	router.Run(":8000")
 }

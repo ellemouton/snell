@@ -2,7 +2,18 @@
 
 {{ template "header.html" .}}
 
-<h1>Payment required</h1>
-<p> {{.LSAT}}</p>
+<div class="container">
+	<h1 class="title">Payment required</h1>
+
+	<p class="invPrice">Price: {{.article.Price}} satoshis </p>
+	
+	<div class="qr"><img src="data:image/png;base64,{{.qrCode}}"></div>
+
+	<div class="invoice"><p> {{.invoice}}</p></div>
+	
+	<input type="hidden" value="{{.macaroon}}" id="macaroon">
+	<input type="text" id="preimage" placeholder="Paste the pre-image here!" required>
+	<button style="display: block; margin: 0 auto;" onclick="storeLSAT({{.article.ID}});">Done!</button>
+</div>
 
 {{ template "footer.html" .}}

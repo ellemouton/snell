@@ -5,12 +5,14 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"log"
 	"net/http"
 	"regexp"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lightningnetwork/lnd/lntypes"
+	"github.com/skip2/go-qrcode"
 
 	articles_db "github.com/ellemouton/snell/articles/db"
 )
@@ -194,15 +196,29 @@ func (s *State) paymentHandler(c *gin.Context) {
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}
 
-	str := fmt.Sprintf("LSAT macaroon=\"%s\", invoice=\"%s\"", base64.StdEncoding.EncodeToString(macBytes), invoice.PaymentRequest)
+	macString := base64.StdEncoding.EncodeToString(macBytes)
+
+	// construct QR code of the invoice
+	png, err := qrcode.Encode(invoice.PaymentRequest, qrcode.Medium, 256)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	encodedPngString := base64.StdEncoding.EncodeToString(png)
+
+	// Add the partial LSAT (mac + invoice) to the response header
+	str := fmt.Sprintf("LSAT macaroon=\"%s\", invoice=\"%s\"", macString, invoice.PaymentRequest)
 	c.Writer.Header().Set("WWW-Authenticate", str)
 
 	c.HTML(
 		http.StatusPaymentRequired,
 		"payment.html",
 		gin.H{
-			"title": "payment",
-			"LSAT":  str,
+			"title":    "payment",
+			"article":  article,
+			"invoice":  invoice.PaymentRequest,
+			"macaroon": macString,
+			"qrCode":   encodedPngString,
 		},
 	)
 }
