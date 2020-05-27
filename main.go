@@ -11,6 +11,8 @@ import (
 
 var router *gin.Engine
 
+var address = flag.String("http_address", ":8000", "address to serve http")
+
 func main() {
 	flag.Parse()
 
@@ -26,5 +28,5 @@ func main() {
 	defer s.cleanup()
 
 	registerRoutes(s)
-	router.Run(":8000")
+	router.Run(*address)
 }

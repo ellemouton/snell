@@ -21,10 +21,6 @@ func registerRoutes(s *State) {
 	router.GET("/", s.homeHandler)
 	router.GET("/post", s.postArticleFormHandler)
 	router.GET("/article/view/:id", s.viewArticleHandler)
-
-	router.GET("/fancy", s.paymentHandler)
-	router.GET("/blah", s.checkForAuthHandler)
-
 	router.POST("/post", s.saveArticleHandler)
 }
 
@@ -38,7 +34,7 @@ func (s *State) homeHandler(c *gin.Context) {
 		http.StatusOK,
 		"index.html",
 		gin.H{
-			"title":   "Home",
+			"title":   "",
 			"payload": articles,
 		},
 	)
@@ -49,7 +45,7 @@ func (s *State) postArticleFormHandler(c *gin.Context) {
 		http.StatusOK,
 		"post.html",
 		gin.H{
-			"title": "Post Article",
+			"title": "-post",
 		},
 	)
 }
@@ -158,7 +154,7 @@ func (s *State) displayArticleHandler(c *gin.Context) {
 		http.StatusOK,
 		"article.html",
 		gin.H{
-			"title":   "View",
+			"title":   "-view",
 			"info":    article,
 			"payload": content,
 		},
@@ -214,7 +210,7 @@ func (s *State) paymentHandler(c *gin.Context) {
 		http.StatusPaymentRequired,
 		"payment.html",
 		gin.H{
-			"title":    "payment",
+			"title":    "-pay",
 			"article":  article,
 			"invoice":  invoice.PaymentRequest,
 			"macaroon": macString,
