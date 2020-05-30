@@ -202,14 +202,6 @@ func (s *State) paymentHandler(c *gin.Context) {
 
 	encodedPngString := base64.StdEncoding.EncodeToString(png)
 
-	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-	c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-	c.Writer.Header().Set("Access-Control-Expose-Headers", "WWW-Authenticate")
-	c.Writer.Header().Set(
-		"Access-Control-Allow-Headers",
-		"Authorization, Grpc-Metadata-macaroon, WWW-Authenticate",
-	)
-
 	// Add the partial LSAT (mac + invoice) to the response header
 	str := fmt.Sprintf("LSAT macaroon=\"%s\", invoice=\"%s\"", macString, invoice.PaymentRequest)
 	c.Writer.Header().Set("WWW-Authenticate", str)
