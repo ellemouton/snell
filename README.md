@@ -1,5 +1,7 @@
 # Snell :zap:
 
+https://snell.ellemouton.com/
+
 Using Lightning and LSATs to create a blog website.
 - pay per article
 - no user registration
