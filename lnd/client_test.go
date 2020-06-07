@@ -1,9 +1,9 @@
 package lnd
 
-//func TestAddInvoice(t *testing.T) {
-//	client, err := New()
-//	require.NoError(t, err)
+//func testaddinvoice(t *testing.t) {
+//	client, err := new()
+//	require.noerror(t, err)
 //
-//	_, err = client.AddInvoice(context.Background(), 10, 3600)
+//	_, err = client.AddInvoice(context.Background(), 10, 3600, "test")
 //	require.NoError(t, err)
 //}

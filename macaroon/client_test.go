@@ -72,11 +72,14 @@ func TestVerifyMacaroon(t *testing.T) {
 	mac, err := c.Create(payHash, "article", 1)
 	require.NoError(t, err)
 
-	valid, err := c.Verify(mac, preimage1, "article", 1)
+	macBytes, err := mac.MarshalBinary()
+	require.NoError(t, err)
+
+	valid, err := c.Verify(macBytes, preimage1, "article", 1)
 	require.NoError(t, err)
 	require.True(t, valid)
 
-	valid, err = c.Verify(mac, preimage2, "article", 1)
+	valid, err = c.Verify(macBytes, preimage2, "article", 1)
 	require.NoError(t, err)
 	require.False(t, valid)
 

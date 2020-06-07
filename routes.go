@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lightningnetwork/lnd/lntypes"
@@ -195,7 +196,7 @@ func (s *State) paymentHandler(c *gin.Context) {
 	macString := base64.StdEncoding.EncodeToString(macBytes)
 
 	// construct QR code of the invoice
-	png, err := qrcode.Encode(invoice.PaymentRequest, qrcode.Medium, 256)
+	png, err := qrcode.Encode(strings.ToUpper(invoice.PaymentRequest), qrcode.Medium, 256)
 	if err != nil {
 		log.Fatal(err)
 	}
