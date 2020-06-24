@@ -19,6 +19,7 @@ go get -u github.com/ellemouton/snell
 
 - lnd
 - etcd
+- mysql
 
 3. Prep the DB:
 
