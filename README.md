@@ -1,11 +1,20 @@
 # Snell :zap:
 
-https://snell.ellemouton.com/
+https://www.ellemouton.com/
 
 Using Lightning and LSATs to create a blog website.
 - pay per article
 - no user registration
 - once you have paid for an article, you will have the necessary LSAT and will not need to pay again.
+
+----------------------------------------------------
+
+# Note
+
+This used to be an all-in-one monolith but I recently moved to a microservice
+architecture where the blog-serving website and the LSAT checking reverse proxy
+(snell) are 2 separate binaries. See the code for these services at
+https://github.com/ellemouton/thunder
 
 ----------------------------------------------------
 
